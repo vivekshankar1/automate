@@ -27,7 +27,7 @@ enum trendCirclesTypes {
   SINGLE = 4,
   DOUBLE = 6,
   TRIPLE = 8,
-  QUADRUPLE = 10,
+  QUADRUPLE = 10
 }
 @Component({
   selector: 'app-overview-trend',
@@ -267,11 +267,15 @@ export class OverviewTrendComponent implements OnChanges, OnDestroy  {
     // The failed circle will always occupy the outermost position
     update.select('.status-dot.failed')
       .attr('r', d => {
-        if (d.failed === d.passed && d.failed === d.skipped && d.failed === d.waived) { return trendCirclesTypes.QUADRUPLE; }
+        if (d.failed === d.passed && d.failed === d.skipped && d.failed === d.waived) {
+          return trendCirclesTypes.QUADRUPLE;
+        }
         if (d.failed === d.passed && d.failed === d.skipped) { return trendCirclesTypes.TRIPLE; }
         if (d.failed === d.passed && d.failed === d.waived) { return trendCirclesTypes.TRIPLE; }
         if (d.failed === d.skipped && d.failed === d.waived) { return trendCirclesTypes.TRIPLE; }
-        if (d.failed === d.passed || d.failed === d.skipped || d.failed === d.waived) { return trendCirclesTypes.DOUBLE; }
+        if (d.failed === d.passed || d.failed === d.skipped || d.failed === d.waived) {
+          return trendCirclesTypes.DOUBLE;
+        }
         return trendCirclesTypes.SINGLE;
       });
 
