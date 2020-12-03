@@ -22,6 +22,13 @@ export interface TrendData {
   waived: number;
 }
 
+// Contains sizes for circles in trend graph on compliance dashboard
+enum trendCirclesTypes {
+  SINGLE = 4,
+  DOUBLE = 6,
+  TRIPLE = 8,
+  QUADRUPLE = 10,
+}
 @Component({
   selector: 'app-overview-trend',
   templateUrl: './overview-trend.component.html',
@@ -247,25 +254,47 @@ export class OverviewTrendComponent implements OnChanges, OnDestroy  {
         .classed('hidden', isHidden);
     });
 
+    // The circles always maintain the order from outermost to innermost :
+    // Failed, passed, skipped, waived
+
+    // Updates the size for the FAILED circle at the point of intersection
+    // As there are 4 circles now (max value increased from 8 to 10), each
+    //  circle will take 2 units and base circle default is 4.
+    // That makes 4+2+2+2 = 10 for when all 4 are present at intersection
+    // If there are 3 circles then, 4+2+2 = 8
+    // If there are 2 circles then, 4+2 = 6
+    // If its only 1 circle then 4
+    // The failed circle will always occupy the outermost position
     update.select('.status-dot.failed')
       .attr('r', d => {
-        if (d.failed === d.passed && d.failed === d.skipped && d.failed === d.waived) { return 10; }
-        if (d.failed === d.passed && d.failed === d.skipped) { return 8; }
-        if (d.failed === d.passed && d.failed === d.waived) { return 8; }
-        if (d.failed === d.skipped && d.failed === d.waived) { return 8; }
-        if (d.failed === d.passed || d.failed === d.skipped || d.failed === d.waived) { return 6; }
-        return 4;
+        if (d.failed === d.passed && d.failed === d.skipped && d.failed === d.waived) { return trendCirclesTypes.QUADRUPLE; }
+        if (d.failed === d.passed && d.failed === d.skipped) { return trendCirclesTypes.TRIPLE; }
+        if (d.failed === d.passed && d.failed === d.waived) { return trendCirclesTypes.TRIPLE; }
+        if (d.failed === d.skipped && d.failed === d.waived) { return trendCirclesTypes.TRIPLE; }
+        if (d.failed === d.passed || d.failed === d.skipped || d.failed === d.waived) { return trendCirclesTypes.DOUBLE; }
+        return trendCirclesTypes.SINGLE;
       });
 
+    // Updates the sizes for the PASSED circle at the point of intersection
+    // The passed circle will also aquire the second position from
+    //  outer (only after the failed circle)
+    // If there are 3 circles then, 4+2+2 = 8
+    // If there are 2 circles then, 4+2 = 6
+    // If its only 1 circle then 4
     update.select('.status-dot.passed')
       .attr('r', d => {
-        if (d.passed === d.skipped && d.passed === d.waived) { return 8; }
-        if (d.passed === d.skipped || d.passed === d.waived) { return 6; }
-        return 4;
+        if (d.passed === d.skipped && d.passed === d.waived) { return trendCirclesTypes.TRIPLE; }
+        if (d.passed === d.skipped || d.passed === d.waived) { return trendCirclesTypes.DOUBLE; }
+        return trendCirclesTypes.SINGLE;
       });
 
+    // Updates the sizes for the SKIPPED circle at the point of intersection
+    // The passed circle will also aquire the third position from
+    //  outer (only after the passed circle)
+    // If there are 2 circles then, 4+2 = 6
+    // If its only 1 circle then 4
     update.select('.status-dot.skipped')
-      .attr('r', d => d.skipped === d.waived ? 6 : 4);
+      .attr('r', d => d.skipped === d.waived ? trendCirclesTypes.DOUBLE : trendCirclesTypes.SINGLE);
 
     update.select('.dot-group-bg')
       .attr('id', (_d, i) => `dot-group-bg-${i}`)
